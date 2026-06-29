@@ -17,8 +17,6 @@ Add deployed URL here after deployment:
 
 ``
 
-
-
 ## Local setup
 
 ```bash

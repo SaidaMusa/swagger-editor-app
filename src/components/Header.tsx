@@ -16,8 +16,10 @@ export function Header() {
 
   useEffect(() => {
     const onScroll = () => setCompact(window.scrollY > 12);
+
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -39,14 +41,22 @@ export function Header() {
       <div className="header-inner">
         <Link href="/" className="logo" aria-label="Swagger Editor App home">
           <span className="logo-mark">S</span>
-          <span>{t("appName")}</span>
+          <span className="logo-text">{t("appName")}</span>
         </Link>
+
         <nav className="nav" aria-label="Main navigation">
           <Link href="/about" className="nav-link">
             {t("about")}
           </Link>
+
+          {user ? (
+            <Link href="/history" className="nav-link">
+              {t("history")}
+            </Link>
+          ) : null}
+
           <select
-            className="select"
+            className="language-select"
             aria-label={t("language")}
             value={language}
             onChange={(event) => setLanguage(event.target.value as Language)}
@@ -54,25 +64,24 @@ export function Header() {
             <option value="en">English</option>
             <option value="uz">O‘zbek</option>
           </select>
-          {user ? (
-            <>
-              <Link href="/history" className="nav-link">
-                {t("history")}
-              </Link>
+
+          <div className="auth-actions">
+            {user ? (
               <button className="button danger" onClick={signOut} type="button">
                 {t("signOut")}
               </button>
-            </>
-          ) : (
-            <>
-              <Link href="/sign-in" className="nav-link">
-                {t("signIn")}
-              </Link>
-              <Link href="/sign-up" className="button primary">
-                {t("signUp")}
-              </Link>
-            </>
-          )}
+            ) : (
+              <>
+                <Link href="/sign-in" className="nav-link">
+                  {t("signIn")}
+                </Link>
+
+                <Link href="/sign-up" className="button primary">
+                  {t("signUp")}
+                </Link>
+              </>
+            )}
+          </div>
         </nav>
       </div>
     </header>
