@@ -77,6 +77,7 @@ function detectAndParse(source: string): ParseState {
   try {
     const parsed = JSON.parse(source) as unknown;
     const validation = validateOpenApiDocument(parsed);
+
     return {
       format: "json",
       document: validation.valid ? (parsed as OpenApiDocument) : null,
@@ -86,6 +87,7 @@ function detectAndParse(source: string): ParseState {
     try {
       const parsed = load(source) as unknown;
       const validation = validateOpenApiDocument(parsed);
+
       return {
         format: "yaml",
         document: validation.valid ? (parsed as OpenApiDocument) : null,
@@ -144,9 +146,10 @@ export function SwaggerWorkspace() {
 
     if (parsed.format === "yaml") {
       setSource(JSON.stringify(parsed.document, null, 2));
-    } else {
-      setSource(dump(parsed.document, { noRefs: true, lineWidth: 100 }));
+      return;
     }
+
+    setSource(dump(parsed.document, { noRefs: true, lineWidth: 100 }));
   };
 
   const saveSchema = async () => {
@@ -166,7 +169,7 @@ export function SwaggerWorkspace() {
       return;
     }
 
-    showToast(t("saved"));
+    showToast(t("saved"), "success");
   };
 
   return (
@@ -175,15 +178,22 @@ export function SwaggerWorkspace() {
         <h1>Swagger/OpenAPI UI</h1>
         <p>{t("mainDescription")}</p>
       </div>
+
       <div className="workspace">
-        <section className="workspace-pane" aria-label="Swagger editor">
-          <div className="pane-header">
-            <h2>{t("editor")}</h2>
-            <div className="nav">
-              <span className="badge">{parsed.format.toUpperCase()}</span>
+        <section className="panel" aria-label="Swagger editor">
+          <div className="panel-header">
+            <div className="panel-title">
+              <h2>{t("editor")}</h2>
+              <p>{parsed.document ? t("schemaValid") : t("schemaInvalid")}</p>
+            </div>
+
+            <div className="panel-actions">
+              <span className="status-pill">{parsed.format.toUpperCase()}</span>
+
               <button className="button" onClick={toggleFormat} type="button">
                 JSON ↔ YAML
               </button>
+
               {user ? (
                 <button className="button primary" onClick={saveSchema} type="button">
                   {t("saveSchema")}
@@ -191,30 +201,43 @@ export function SwaggerWorkspace() {
               ) : null}
             </div>
           </div>
-          <textarea
-            className="editor-area"
-            spellCheck={false}
-            value={source}
-            onChange={(event) => setSource(event.target.value)}
-            aria-label="OpenAPI schema editor"
-          />
-          <div className="validation-row">
-            {parsed.document ? (
-              <span className="badge success">{t("schemaValid")}</span>
-            ) : (
-              <span className="badge error">{t("schemaInvalid")}</span>
-            )}
-            {parsed.error ? <span className="error-text">{parsed.error}</span> : null}
+
+          <div className="panel-body stack">
+            <textarea
+              className="textarea"
+              spellCheck={false}
+              value={source}
+              onChange={(event) => setSource(event.target.value)}
+              aria-label="OpenAPI schema editor"
+            />
+
+            <div className="endpoint-summary">
+              {parsed.document ? (
+                <span className="status-pill success">{t("schemaValid")}</span>
+              ) : (
+                <span className="status-pill error">{t("schemaInvalid")}</span>
+              )}
+
+              {parsed.error ? <span className="error-text">{parsed.error}</span> : null}
+            </div>
           </div>
         </section>
-        <section className="workspace-pane" aria-label="Swagger viewer">
-          <div className="pane-header">
-            <h2>{t("viewer")}</h2>
-            <span className="badge">
+
+        <section className="panel" aria-label="Swagger viewer">
+          <div className="panel-header">
+            <div className="panel-title">
+              <h2>{t("viewer")}</h2>
+              <p>{parsed.document ? t("endpointsLoaded") : t("waitingForSchema")}</p>
+            </div>
+
+            <span className="status-pill">
               {parsed.document ? t("endpointsLoaded") : t("waitingForSchema")}
             </span>
           </div>
-          <SwaggerViewer document={parsed.document} />
+
+          <div className="panel-body">
+            <SwaggerViewer document={parsed.document} />
+          </div>
         </section>
       </div>
     </section>
