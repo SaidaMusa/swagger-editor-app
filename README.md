@@ -13,9 +13,7 @@ Full-stack React application for editing OpenAPI/Swagger specifications, viewing
 
 ## Demo
 
-Add deployed URL here after deployment:
-
-``
+`https://swagger-editor-app-ashy.vercel.app/`
 
 ## Local setup
 
